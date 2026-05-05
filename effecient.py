@@ -184,8 +184,8 @@ def run_effecient(i_file_path, o_file_path):
     with open(o_file_path, "w") as file:
         file.write(first_string + "\n")
         file.write(second_string + "\n")
-        file.write(f"{time_ms} ms\n")
-        file.write(f"{memory_consumed} KB\n")
+        file.write(f"{time_ms}\n")
+        file.write(f"{memory_consumed}\n")
     return {
         "m": M,
         "n": N,
