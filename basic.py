@@ -1,6 +1,7 @@
 # Running Example: python3 basic.py SampleTestCases\input3.txt output.txt
-import sys
 import os
+import sys
+import time
 import psutil
 
 #### PART 1: DEFINE CONSTANTS ####
@@ -42,7 +43,7 @@ with open(i_file_path, 'r') as file:
                 Y = line
 
 #### PART 3: DYNAMIC PROGRAMMING ####
-
+start_time = time.time()
 # create OPT with i rows and j cols of zeroes
 OPT = []
 for i in range(len(X)+1):
@@ -114,13 +115,17 @@ print(first_string_alignment)
 print(second_string_alignment)
 
 #### PART 5: FILE OUTPUT ####
+process = psutil.Process() 
+memory_info = process.memory_info()
+memory_consumed = int(memory_info.rss/1024) 
+end_time = time.time()
+time_taken = (end_time - start_time) * 1000
+#### PART 5: FILE OUTPUT ####
 with open(o_file_path, "w") as file:
-    file.write(str(score) + "\n")
     file.write(first_string_alignment + "\n")
     file.write(second_string_alignment + "\n")
-    ### TO DO ###
-    file.write("TO DO time in ms")
-    file.write("TO DO memory in KB")
+    file.write(f"{time_taken} ms\n")
+    file.write(f"{memory_consumed} KB\n")
 
 #### PART 6: ANSWER CHECK ####
 score_check = 0

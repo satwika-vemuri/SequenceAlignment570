@@ -1,10 +1,10 @@
 # Running Example: python3 basic.py SampleTestCases\input3.txt output.txt
-import sys
 import os
+import sys
+import time
 import psutil
-
 #### PART 1: DEFINE CONSTANTS ####
-
+MAXIMUM_DP_AREA = 100
 DELTA = 30
 ALPHA = {"AA": 0, "AC": 110, "AG": 48, "AT": 94,
          "CA": 110, "CC": 0, "CG": 118, "CT": 48,
@@ -42,57 +42,11 @@ with open(i_file_path, 'r') as file:
                 Y = line
 
 #### PART 3: DYNAMIC PROGRAMMING ####
-
-# Divide  
-def divide(x, y):
-    # Base Cases
-    if len(x) == 0:
-        return len(y) * DELTA
-    if len(y) == 0:
-        return len(x) * DELTA
-    if len(x) == 1 or len(y) == 1:
-        return compute_align_cost(x, y)
-    
-    # Split string x into two
-    x_l, x_r = x[:len(x)//2], x[len(x)//2:]
-    
-    # Calculate the min cost for aligning x up to certain points of Y
-    left_cost = compute_split_costs(x_l, y)
-    right_cost = compute_split_costs(x_r[::-1], y[::-1])
-    
-    # Find the minimum total add
-    min_cost = left_cost[0] + right_cost[-1]
-    split_index = 0
-    for i in range(1, len(left_cost)):
-        cost_of_alignment = left_cost[i] + right_cost[len(right_cost) - i - 1]
-        if (cost_of_alignment < min_cost):
-            min_cost = cost_of_alignment
-            split_index = i
-    return divide(x_l, y[:split_index]) + divide(x_r, y[split_index:])
-
-def compute_split_costs(x, y):
+# Taken from basic.py
+def base_case_DP(x, y):
     OPT = []
-    for i in range(len(y)+1):
-        OPT.append(0)
-    for i in range(len(y)+1):
-        OPT[i] = i*DELTA
-
-    # fill in DP array
-    for i in range(1, len(x) + 1):
-        curr = [0] * (len(y) +1)
-        curr[0] = i * DELTA
-        for j in range(1, len(y) + 1):
-            val_1 = OPT[j-1] + ALPHA[x[i-1]+y[j-1]] # we do x[i-1] since this loop goes from 1 to len(X) + 1 (it is shifted by 1)
-            val_2 = OPT[j] + DELTA
-            val_3 = curr[j-1] + DELTA
-
-            curr[j] = min(val_1, val_2, val_3)
-        OPT = curr
-    return OPT
-
-def compute_align_cost(x, y):
-    # create OPT with i rows and j cols of zeroes
-    OPT = []
+    process = psutil.Process()
+    memory_used = 0
     for i in range(len(x)+1):
         arr = []
         for j in range(len(y)+1):
@@ -108,78 +62,129 @@ def compute_align_cost(x, y):
     # fill in DP array
     for i in range(1, len(x) + 1):
         for j in range(1, len(y) + 1):
-            val_1 = OPT[i-1][j-1] + ALPHA[x[i-1]+y[j-1]] # we do X[i-1] since this loop goes from 1 to len(X) + 1 (it is shifted by 1)
+            val_1 = OPT[i-1][j-1] + ALPHA[x[i-1]+y[j-1]] # we do x[i-1] since this loop goes from 1 to len(x) + 1 (it is shifted by 1)
             val_2 = OPT[i-1][j] + DELTA
             val_3 = OPT[i][j-1] + DELTA
-
             OPT[i][j] = min(val_1, val_2, val_3)
-    return OPT[len(x)][len(y)]
     
-# work backwards to see where score came from and to figure out alignments
-first_string_alignment = ""
-second_string_alignment = ""
+    # work backwards to see where score came from and to figure out alignments
+    first_string_alignment = ""
+    second_string_alignment = ""
 
-i = len(X)
-j = len(Y)
-count = 0
+    i = len(x)
+    j = len(y)
 
-while not((i == 0) and (j == 0)):
-    val_1 = OPT[i-1][j-1] + ALPHA[X[i-1]+Y[j-1]] # we do X[i-1] since this loop goes from 1 to len(X) + 1 (it is shifted by 1)
-    val_2 = OPT[i-1][j] + DELTA
-    count += 1
-    count = 10
+    while not((i == 0) and (j == 0)):
+        if i > 0 and j > 0:
+            val_1 = OPT[i-1][j-1] + ALPHA[x[i-1]+y[j-1]] # we do x[i-1] since this loop goes from 1 to len(x) + 1 (it is shifted by 1)
+        else:
+            val_1 = 9999999999999
+        if i > 0:
+            val_2 = OPT[i-1][j] + DELTA
+        else:
+            val_2 = 9999999999999
 
-    if(OPT[i][j] == val_1):
-        if(count < 10):
-            print("val1")
-        count += 1
-        first_string_alignment += X[i-1]
-        second_string_alignment += Y[j-1]
-        i -= 1
-        j -= 1
-    elif(OPT[i][j] == val_2): 
-        if(count < 10):
-            print("val2")
-        first_string_alignment += X[i-1]
-        second_string_alignment += "_"
-        i -= 1
-    else: 
-        if(count < 10):
-            print("val3")
-        first_string_alignment += "_"
-        second_string_alignment += Y[j-1]
-        j -= 1
+        if j > 0:
+            val_3 = OPT[i][j-1] + DELTA
+        else:
+            val_3 = 9999999999999
+        if i > 0 and j > 0 and OPT[i][j] == val_1:
+            first_string_alignment += x[i-1]
+            second_string_alignment += y[j-1]
+            i -= 1
+            j -= 1
+        elif i > 0 and OPT[i][j] == val_2:
+            first_string_alignment += x[i-1]
+            second_string_alignment += "_"
+            i -= 1
+        else:
+            first_string_alignment += "_"
+            second_string_alignment += y[j-1]
+            j -= 1
 
-# reverse the strings to reflect forward order
-first_string_alignment = first_string_alignment[::-1]
-second_string_alignment = second_string_alignment[::-1]
+    # reverse the strings to reflect forward order
+    first_string_alignment = first_string_alignment[::-1]
+    second_string_alignment = second_string_alignment[::-1]
+    memory_info = process.memory_info()
+    memory_used = max(memory_used, memory_info.rss)
+    return first_string_alignment, second_string_alignment, memory_used
 
-# Answer
-print(score) 
-print(first_string_alignment)
-print(second_string_alignment)
 
+def compute_split_costs(x, y):
+    OPT = []
+    for j in range(len(y) + 1):
+        OPT.append(j * DELTA)
+    for i in range(1, len(x) + 1):
+        # Each iteration we want to basically calculate the next row of our table, removing the old row
+        curr = [0] * (len(y) + 1)
+        curr[0] = i * DELTA
+        for j in range(1, len(y) + 1):
+            # Same logic as the basic version
+            val_1 = OPT[j-1] + ALPHA[x[i-1] + y[j-1]]
+            val_2 = OPT[j] + DELTA
+            val_3 = curr[j-1] + DELTA
+            curr[j] = min(val_1, val_2, val_3)
+        OPT = curr
+    return OPT
+
+def divide_and_conquer(x, y):
+    process = psutil.Process()
+    memory_used = 0
+    if len(x) == 0:
+        memory_info = process.memory_info()
+        memory_used = max(memory_used, memory_info.rss)
+        return "_" * len(y), y, memory_used
+    if len(y) == 0:
+        memory_info = process.memory_info()
+        memory_used = max(memory_used, memory_info.rss)
+        return x, "_" * len(x), memory_used
+    if len(x) * len(y) < MAXIMUM_DP_AREA:
+        return base_case_DP(x, y)
+    
+    mid = len(x) // 2
+    x_left = x[:mid]
+    x_right = x[mid:]
+    
+    # Compute alignment costs for all split areas, the right side is reversed because we want the prefix alignment
+    left_alignment_costs = compute_split_costs(x_left, y)
+    right_alignment_costs = compute_split_costs(x_right[::-1], y[::-1])
+    min_cost = 99999999999999999
+    split_index = 0
+    
+    # find the optimal split
+    for i in range(len(y) + 1):
+        if min_cost > left_alignment_costs[i] + right_alignment_costs[len(y) - i]:
+            split_index = i
+            min_cost = left_alignment_costs[i] + right_alignment_costs[len(y) - i]
+    
+    optimal_left_alignment = divide_and_conquer(x_left, y[:split_index])
+    optimal_right_alignment = divide_and_conquer(x_right, y[split_index:])
+    memory_info = process.memory_info()
+    memory_used = max(memory_used, memory_info.rss)
+    return (optimal_left_alignment[0] + optimal_right_alignment[0], optimal_left_alignment[1] + optimal_right_alignment[1], memory_used)
+
+#### PART 4: Run code with Alignment ####
+start_time = time.time() 
+first_string, second_string, memory_consumed = divide_and_conquer(X, Y)
+memory_consumed = int(memory_consumed / 1024)
+end_time = time.time()
+time_taken = (end_time - start_time) * 1000 
+#### PART 5: Calculate the score ####
+score = 0
+for i in range(len(first_string)):
+    if first_string[i] == "_":
+        score += DELTA
+    elif second_string[i] == "_":
+        score += DELTA
+    else:
+        score += ALPHA[first_string[i] + second_string[i]]
+
+print(score)
+print(first_string)
+print(second_string)
 #### PART 5: FILE OUTPUT ####
 with open(o_file_path, "w") as file:
-    file.write(str(score) + "\n")
-    file.write(first_string_alignment + "\n")
-    file.write(second_string_alignment + "\n")
-    ### TO DO ###
-    file.write("TO DO time in ms")
-    file.write("TO DO memory in KB")
-
-#### PART 6: ANSWER CHECK ####
-score_check = 0
-for i in range(len(first_string_alignment)):
-    if(first_string_alignment[i] == "_"):
-        score_check += DELTA
-    elif(second_string_alignment[i] == "_"):
-        score_check += DELTA
-    else:
-        score_check += ALPHA[first_string_alignment[i]+second_string_alignment[i]]
-
-if(score_check != score):
-    print("ERROR")
-
-
-        
+    file.write(first_string + "\n")
+    file.write(second_string + "\n")
+    file.write(f"{time_taken} ms\n")
+    file.write(f"{memory_consumed} KB\n")
