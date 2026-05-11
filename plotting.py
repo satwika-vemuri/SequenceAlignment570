@@ -2,8 +2,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 from basic import run_basic
+
 # TODO: after we implement run_efficient(), uncomment the efficient_graph plotting lines below
-# from efficient import run_efficient
+from efficient import run_efficient
 
 
 # Iterate through the Datapoints folder and run both algorithms on the different inputs
@@ -15,7 +16,10 @@ def collect_results(input_dir="Datapoints"):
 
     for i_file in input_files:
         basic_results.append(run_basic(str(i_file), "temp_basic.txt"))
-        # efficient_results.append(run_efficient(str(i_file), "temp_efficient.txt"))
+        efficient_results.append(run_efficient(str(i_file), "temp_efficient.txt"))
+
+    print(basic_results)
+    print(efficient_results)
 
     return basic_results, efficient_results
 
@@ -32,15 +36,15 @@ def plot_results(basic_results, efficient_results):
     # --- Time Plot ---
     plt.figure()
     plt.plot(x, [r["time_ms"] for r in basic_results], marker="o", label="Basic")
-    # plt.plot(
-    #     x,
-    #     [r["time_ms"] for r in efficient_results],
-    #     marker="o",
-    #     label="Memory-efficient",
-    # )
-    plt.xlabel("Problem size (m + n)")
-    plt.ylabel("Time (ms)")
-    plt.title("Time vs Problem Size")
+    plt.plot(
+        x,
+        [r["time_ms"] for r in efficient_results],
+        marker="o",
+        label="Memory-efficient",
+    )
+    plt.xlabel("Problem Size (m + n)")
+    plt.ylabel("CPU Time (ms)")
+    plt.title("CPU Time vs Problem Size")
     plt.legend()
     plt.grid(True)
     plt.savefig("time_plot.png")
@@ -49,17 +53,18 @@ def plot_results(basic_results, efficient_results):
     # --- Memory Plot ---
     plt.figure()
     plt.plot(x, [r["memory_kb"] for r in basic_results], marker="o", label="Basic")
-    # plt.plot(
-    #     x,
-    #     [r["memory_kb"] for r in efficient_results],
-    #     marker="o",
-    #     label="Memory-efficient",
-    # )
-    plt.xlabel("Problem size (m + n)")
-    plt.ylabel("Memory (KB)")
-    plt.title("Memory vs Problem Size")
+    plt.plot(
+        x,
+        [r["memory_kb"] for r in efficient_results],
+        marker="o",
+        label="Memory-efficient",
+    )
+    plt.xlabel("Problem Size (m + n)")
+    plt.ylabel("Memory Usage (KB)")
+    plt.title("Memory Usage vs Problem Size")
     plt.legend()
     plt.grid(True)
+    plt.tight_layout()
     plt.savefig("memory_plot.png")
     plt.close()
 

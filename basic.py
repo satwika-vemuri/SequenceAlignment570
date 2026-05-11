@@ -4,6 +4,7 @@ import sys
 import time
 import psutil
 
+
 def run_basic(i_file_path, o_file_path):
     #### PART 1: DEFINE CONSTANTS ####
 
@@ -131,15 +132,14 @@ def run_basic(i_file_path, o_file_path):
     second_string_alignment = second_string_alignment[::-1]
 
     # Answer
-    print(score)
-    print(first_string_alignment)
-    print(second_string_alignment)
+    # print(score)
+    # print(first_string_alignment)
+    # print(second_string_alignment)
 
     # end timer and get total memory used
     end_time = time.time()
     time_ms = (end_time - start_time) * 1000
     memory_consumed = int(memory_used / 1024)
-
 
     #### PART 5: FILE OUTPUT ####
     with open(o_file_path, "w") as file:
