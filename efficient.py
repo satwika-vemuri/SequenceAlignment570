@@ -206,6 +206,7 @@ def run_efficient(i_file_path, o_file_path):
     # print(second_string)
     #### PART 5: FILE OUTPUT ####
     with open(o_file_path, "w") as file:
+        file.write(f"{score}\n")
         file.write(first_string + "\n")
         file.write(second_string + "\n")
         file.write(f"{time_ms}\n")
